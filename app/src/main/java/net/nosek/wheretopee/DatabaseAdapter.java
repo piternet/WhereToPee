@@ -85,4 +85,13 @@ public class DatabaseAdapter {
     public void close() {
         dbHelper.close();
     }
+
+    /* SAVING TO DATABASE */
+    public long insertUser(String nickname, String phoneInfo) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_NICKNAME, nickname);
+        contentValues.put(KEY_PHONEINFO, phoneInfo);
+        return db.insert(DB_USER_TABLE, null, contentValues);
+    }
+
 }
