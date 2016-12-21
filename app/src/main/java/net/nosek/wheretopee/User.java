@@ -2,22 +2,18 @@ package net.nosek.wheretopee;
 
 
 public class User {
-    private int id;
+    private long id;
     private String nickname;
     private String phoneInfo;
 
-    public User(int id, String nickname, String phoneInfo) {
+    public User(long id, String nickname, String phoneInfo) {
         this.id = id;
         this.nickname = nickname;
         this.phoneInfo = phoneInfo;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getNickname() {

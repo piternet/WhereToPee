@@ -86,12 +86,36 @@ public class DatabaseAdapter {
         dbHelper.close();
     }
 
-    /* SAVING TO DATABASE */
+    /* SAVING & READING TO / FROM DATABASE */
     public long insertUser(String nickname, String phoneInfo) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(KEY_NICKNAME, nickname);
         contentValues.put(KEY_PHONEINFO, phoneInfo);
         return db.insert(DB_USER_TABLE, null, contentValues);
+    }
+
+    /* returns true if deletion was succesful, false otherwise */
+    public boolean deleteUser(long id) {
+        String where = KEY_ID + "=" + id;
+        return db.delete(DB_USER_TABLE, where, null) > 0;
+    }
+
+    public Cursor getAllUsers() {
+        String[] columns = {KEY_ID, KEY_NICKNAME, KEY_PHONEINFO};
+        return db.query(DB_USER_TABLE, columns, null, null, null, null, null);
+    }
+
+    public User getUser(long id) {
+        String[] columns = {KEY_ID, KEY_NICKNAME, KEY_PHONEINFO};
+        String where = KEY_ID + "" + id;
+        Cursor cursor = db.query(DB_USER_TABLE, columns, where, null, null, null, null);
+        User user = null; // to return
+        if(cursor != null && cursor.moveToFirst()) {
+            String nickname = cursor.getString(NICKNAME_COLUMN);
+            String phoneInfo = cursor.getString(PHONEINFO_COLUMN);
+            user = new User(id, nickname, phoneInfo);
+        }
+        return user;
     }
 
 }

@@ -3,13 +3,15 @@ package net.nosek.wheretopee;
 import com.google.android.gms.maps.model.LatLng;
 
 public class Toilet {
+    private long id;
     private LatLng coordinates;
     private User userWhoAdded;
     private String description;
     private boolean isFree, hasChangingTable, disabledAccesible;
     private boolean acceptedByAdmin = false;
 
-    public Toilet(LatLng coordinates, User userWhoAdded, String description, boolean hasChangingTable, boolean disabledAccesible, boolean acceptedByAdmin, boolean isFree) {
+    public Toilet(long id, LatLng coordinates, User userWhoAdded, String description, boolean hasChangingTable, boolean disabledAccesible, boolean acceptedByAdmin, boolean isFree) {
+        this.id = id;
         this.coordinates = coordinates;
         this.userWhoAdded = userWhoAdded;
         this.description = description;
@@ -27,6 +29,10 @@ public class Toilet {
         this.isFree = isFree;
         this.hasChangingTable = hasChangingTable;
         this.disabledAccesible = disabledAccesible;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public LatLng getCoordinates() {
@@ -88,6 +94,7 @@ public class Toilet {
     @Override
     public String toString() {
         return "Toilet{" +
+                "id=" + id +
                 "coordinates=" + coordinates +
                 ", userWhoAdded=" + userWhoAdded +
                 ", description='" + description + '\'' +
