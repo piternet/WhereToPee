@@ -30,7 +30,7 @@ public class DatabaseAdapter {
 
     /* CREATE TABLE User(id INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT, nickname TEXT NOT NULL, phoneinfo TEXT); */
     private static final String DB_CREATE_USER_TABLE =
-            "CREATE_TABLE" + DB_USER_TABLE + "(" +
+            "CREATE TABLE " + DB_USER_TABLE + "(" +
              KEY_ID + " " + ID_OPTIONS + ", " +
              KEY_NICKNAME + " " + NICKNAME_OPITONS + ", " +
              KEY_PHONEINFO + " " + PHONEINFO_OPITONS +

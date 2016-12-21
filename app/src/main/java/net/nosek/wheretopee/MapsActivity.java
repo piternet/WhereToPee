@@ -1,7 +1,9 @@
 package net.nosek.wheretopee;
 
+import android.database.Cursor;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,9 +12,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private DatabaseAdapter dbUserAdapter;
+    private Cursor userCursor;
+    private ArrayList<User> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +29,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        dbUserAdapter = new DatabaseAdapter(getApplicationContext());
+        dbUserAdapter.open();
+        dbUserAdapter.insertUser("admin", "Android 3.1");
+        dbUserAdapter.insertUser("piternet", "Android 4.1");
+        dbUserAdapter.insertUser("anonim", "iOS xd");
+        getAllUsers();
+        String msg = users.toString();
+        Log.d("USER TAG", msg);
     }
-
 
     /**
      * If Google Play services is not installed on the device, the user will be prompted to install
@@ -38,5 +52,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(52, 21);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    private void getAllUsers() {
+        users = new ArrayList<User>();
+        userCursor = getAllUsersFromDatabase();
+        updateUserList();
+    }
+
+    private Cursor getAllUsersFromDatabase() {
+        userCursor = dbUserAdapter.getAllUsers();
+        if(userCursor != null) {
+            startManagingCursor(userCursor);
+            userCursor.moveToFirst();
+        }
+        return userCursor;
+    }
+
+    void updateUserList() {
+        if(userCursor != null && userCursor.moveToFirst()) {
+            do {
+                long id = userCursor.getLong(dbUserAdapter.ID_COLUMN);
+                String nickname = userCursor.getString(dbUserAdapter.NICKNAME_COLUMN);
+                String phoneInfo = userCursor.getString(dbUserAdapter.PHONEINFO_COLUMN);
+                users.add(new User(id, nickname, phoneInfo));
+            } while(userCursor.moveToNext());
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(dbUserAdapter != null)
+            dbUserAdapter.close();
+        super.onDestroy();
     }
 }
