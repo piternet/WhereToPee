@@ -13,11 +13,11 @@ public class DatabaseAdapter {
     private static final String DEBUG_TAG = "SQL Lite debug";
 
     private static final int DB_VERSION = 1;
-    private static final String DB_NAME = "database.db";
+    private static final String DB_NAME = "WhereToPeeDatabase";
     private static final String DB_USER_TABLE = "User";
 
     public static final String KEY_ID = "id";
-    public static final String ID_OPTIONS = "INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT";
+    public static final String ID_OPTIONS = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final int ID_COLUMN = 0;
 
     public static final String KEY_NICKNAME = "nickname";
@@ -28,7 +28,7 @@ public class DatabaseAdapter {
     public static final String PHONEINFO_OPITONS = "TEXT"; // can be NULL
     public static final int PHONEINFO_COLUMN = 2;
 
-    /* CREATE TABLE User(id INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT, nickname TEXT NOT NULL, phoneinfo TEXT); */
+    /* CREATE TABLE User(id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT NOT NULL, phoneinfo TEXT); */
     private static final String DB_CREATE_USER_TABLE =
             "CREATE TABLE " + DB_USER_TABLE + "(" +
              KEY_ID + " " + ID_OPTIONS + ", " +
