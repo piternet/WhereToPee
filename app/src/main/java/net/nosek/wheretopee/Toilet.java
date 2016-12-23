@@ -7,28 +7,28 @@ public class Toilet {
     private LatLng coordinates;
     private User userWhoAdded;
     private String description;
-    private boolean isFree, hasChangingTable, disabledAccesible;
+    private boolean isFree, hasChangingTable, disabledAccessible;
     private boolean acceptedByAdmin = false;
 
-    public Toilet(long id, LatLng coordinates, User userWhoAdded, String description, boolean hasChangingTable, boolean disabledAccesible, boolean acceptedByAdmin, boolean isFree) {
+    public Toilet(long id, LatLng coordinates, User userWhoAdded, String description, boolean hasChangingTable, boolean disabledAccessible, boolean acceptedByAdmin, boolean isFree) {
         this.id = id;
         this.coordinates = coordinates;
         this.userWhoAdded = userWhoAdded;
         this.description = description;
         this.hasChangingTable = hasChangingTable;
-        this.disabledAccesible = disabledAccesible;
+        this.disabledAccessible = disabledAccessible;
         this.acceptedByAdmin = acceptedByAdmin;
         this.isFree = isFree;
     }
 
     /* Constructor without acceptedByAdmin fiels, false by default */
-    public Toilet(LatLng coordinates, User userWhoAdded, String description, boolean isFree, boolean hasChangingTable, boolean disabledAccesible) {
+    public Toilet(LatLng coordinates, User userWhoAdded, String description, boolean isFree, boolean hasChangingTable, boolean disabledAccessible) {
         this.coordinates = coordinates;
         this.userWhoAdded = userWhoAdded;
         this.description = description;
         this.isFree = isFree;
         this.hasChangingTable = hasChangingTable;
-        this.disabledAccesible = disabledAccesible;
+        this.disabledAccessible = disabledAccessible;
     }
 
     public long getId() {
@@ -75,12 +75,12 @@ public class Toilet {
         this.hasChangingTable = hasChangingTable;
     }
 
-    public boolean isDisabledAccesible() {
-        return disabledAccesible;
+    public boolean isDisabledAccessible() {
+        return disabledAccessible;
     }
 
-    public void setDisabledAccesible(boolean disabledAccesible) {
-        this.disabledAccesible = disabledAccesible;
+    public void setDisabledAccessible(boolean disabledAccessible) {
+        this.disabledAccessible = disabledAccessible;
     }
 
     public boolean isAcceptedByAdmin() {
@@ -100,7 +100,7 @@ public class Toilet {
                 ", description='" + description + '\'' +
                 ", isFree=" + isFree +
                 ", hasChangingTable=" + hasChangingTable +
-                ", disabledAccesible=" + disabledAccesible +
+                ", disabledAccesible=" + disabledAccessible +
                 ", acceptedByAdmin=" + acceptedByAdmin +
                 '}';
     }

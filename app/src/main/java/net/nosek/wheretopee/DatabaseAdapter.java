@@ -12,14 +12,18 @@ import android.util.Log;
 public class DatabaseAdapter {
     private static final String DEBUG_TAG = "SQL Lite debug";
 
+    /* Common database constants */
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "WhereToPeeDatabase";
     private static final String DB_USER_TABLE = "User";
+    private static final String DB_COORDINATES_TABLE = "Coordinates";
+    private static final String DB_TOILET_TABLE = "Toilet";
 
     public static final String KEY_ID = "id";
     public static final String ID_OPTIONS = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final int ID_COLUMN = 0;
 
+    /* User database constants */
     public static final String KEY_NICKNAME = "nickname";
     public static final String NICKNAME_OPITONS = "TEXT NOT NULL";
     public static final int NICKNAME_COLUMN = 1;
@@ -28,16 +32,83 @@ public class DatabaseAdapter {
     public static final String PHONEINFO_OPITONS = "TEXT"; // can be NULL
     public static final int PHONEINFO_COLUMN = 2;
 
-    /* CREATE TABLE User(id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT NOT NULL, phoneinfo TEXT); */
+    /* Coordinates database constants */
+    public static final String KEY_LATITUDE = "latitude";
+    public static final String LATITUDE_OPITONS = "REAL NOT NULL";
+    public static final int LATITUDE_COLUMN = 1;
+
+    public static final String KEY_LONGITUDE = "longitude";
+    public static final String LONGITUDE_OPITONS = "REAL NOT NULL";
+    public static final int LONGITUDE_COLUMN = 2;
+
+    /* Toilet database constants */
+    public static final String KEY_COORDINATES = "coordinates";
+    public static final String COORDINATES_OPITONS = "INTEGER REFERENCES Coordinates(id) NOT NULL UNIQUE"; // can't have two toilets in the same location
+    public static final int COORDINATES_COLUMN = 1;
+
+    public static final String KEY_USERWHOADDED = "userWhoAdded";
+    public static final String USERWHOADDED_OPITONS = "INTEGER REFERENCES User(id) NOT NULL";
+    public static final int USERWHOADDED_COLUMN = 2;
+
+    public static final String KEY_DESCRIPTION = "description";
+    public static final String DESCRIPTION_OPITONS = "TEXT NOT NULL";
+    public static final int DESCRIPTION_COLUMN = 3;
+
+    public static final String KEY_HASCHANGINGTABLE = "hasChangingTable";
+    public static final String HASCHANGINGTABLE_OPITONS = "INTEGER NOT NULL CHECK (hasChangingTable = 0 OR hasChangingTable = 1)";
+    public static final int HASCHANGINGTABLE_COLUMN = 4;
+
+    public static final String KEY_DISABLEDACCESSIBLE = "disabledAccesible";
+    public static final String DISABLEDACCESSIBLE_OPITONS = "INTEGER NOT NULL CHECK (disabledAccesible = 0 OR disabledAccesible = 1)";
+    public static final int DISABLEDACCESSIBLE_COLUMN = 5;
+
+    public static final String KEY_ISFREE = "isFree";
+    public static final String ISFREE_OPITONS = "INTEGER NOT NULL CHECK (isFree = 0 OR isFree = 1)";
+    public static final int ISFREE_COLUMN = 6;
+
+    public static final String KEY_ACCEPTEDBYADMIN = "acceptedByAdmin";
+    public static final String ACCEPTEDBYADMIN_OPITONS = "INTEGER NOT NULL DEFAULT 0 CHECK (acceptedByAdmin = 0 OR acceptedByAdmin = 1)";
+    public static final int ACCEPTEDBYADMIN_COLUMN = 7;
+
+    /* Creates User table */
     private static final String DB_CREATE_USER_TABLE =
             "CREATE TABLE " + DB_USER_TABLE + "(" +
              KEY_ID + " " + ID_OPTIONS + ", " +
              KEY_NICKNAME + " " + NICKNAME_OPITONS + ", " +
              KEY_PHONEINFO + " " + PHONEINFO_OPITONS +
              ");";
-    /* DROP TABLE IF EXISTS User */
+    /* Drops User table */
     private static final String DB_DROP_USER_TABLE =
             "DROP TABLE IF EXISTS " + DB_USER_TABLE;
+
+    /* Creates User table */
+    private static final String DB_CREATE_COORDINATES_TABLE =
+            "CREATE TABLE " + DB_COORDINATES_TABLE + "(" +
+            KEY_ID + " " + ID_OPTIONS + ", "+
+            KEY_LATITUDE + " " + LATITUDE_OPITONS + ", " +
+            KEY_LONGITUDE + " " + LONGITUDE_OPITONS +
+            ");";
+
+    /* Drops User table */
+    private static final String DB_DROP_COORDINATES_TABLE =
+            "DROP TABLE IF EXISTS " + DB_COORDINATES_TABLE;
+
+    /* Creates User table */
+    private static final String DB_CREATE_TOILET_TABLE =
+            "CREATE TABLE " + DB_TOILET_TABLE + "(" +
+            KEY_ID + " " + ID_OPTIONS + ", " +
+            KEY_COORDINATES + " " + COORDINATES_OPITONS + ", " +
+            KEY_USERWHOADDED + " " + USERWHOADDED_OPITONS + ", " +
+            KEY_DESCRIPTION + " " + DESCRIPTION_OPITONS + ", " +
+            KEY_HASCHANGINGTABLE + " " + HASCHANGINGTABLE_OPITONS + ", " +
+            KEY_DISABLEDACCESSIBLE + " " + DISABLEDACCESSIBLE_OPITONS + ", " +
+            KEY_ISFREE + " " + ISFREE_OPITONS + ", " +
+            KEY_ACCEPTEDBYADMIN + " " + ACCEPTEDBYADMIN_OPITONS +
+            ");";
+
+    /* Drops User table */
+    private static final String DB_DROP_TOILET_TABLE =
+            "DROP TABLE IF EXISTS " + DB_TOILET_TABLE;
 
     private SQLiteDatabase db;
     private Context context;
