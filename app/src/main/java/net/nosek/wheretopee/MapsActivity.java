@@ -1,11 +1,14 @@
 package net.nosek.wheretopee;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.app.FragmentActivity;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -17,12 +20,21 @@ import java.util.ArrayList;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private DatabaseAdapter dbUserAdapter;
+    private DatabaseAdapter dbAdapter;
 
     private Cursor userCursor;
     private ArrayList<User> users;
-
     private ArrayList<Toilet> toilets;
+
+    private void insertData() {
+        dbAdapter.insertUser("admin", "Android 3.1");
+        dbAdapter.insertUser("piternet", "Android 4.1");
+        dbAdapter.insertUser("anonim", "iOS xd");
+        dbAdapter.insertCoordinates(52.211997, 20.982090);
+        dbAdapter.insertCoordinates(52.188821, 21.002455);
+        dbAdapter.insertToilet(dbAdapter.getCoordinates(1), dbAdapter.getUser(1), "MIMowa toaletka", false, false, false, true);
+        dbAdapter.insertToilet(dbAdapter.getCoordinates(2), dbAdapter.getUser(3), "Druga toaletka", false, true, true, true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,15 +43,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        dbUserAdapter = new DatabaseAdapter(getApplicationContext());
-        dbUserAdapter.open();
-        dbUserAdapter.insertUser("admin", "Android 3.1");
-        dbUserAdapter.insertUser("piternet", "Android 4.1");
-        dbUserAdapter.insertUser("anonim", "iOS xd");
-        dbUserAdapter.insertCoordinates(12, 21);
-        getAllUsers();
-        String msg = users.toString();
+        try {
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(myIntent);
+                overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
+            }
+            else {
+                mapFragment.getMapAsync(this);
+                overridePendingTransition(R.anim.push_up_out, R.anim.push_up_in);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        dbAdapter = new DatabaseAdapter(getApplicationContext());
+        dbAdapter.open();
+        if(dbAdapter.isEmpty())
+            insertData();
+        getAllDataFromDatabase();
+        String msg = users.toString() + "\n" + toilets.toString();
         Log.d("USER TAG", msg);
     }
 
@@ -51,44 +75,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        for(Toilet toilet : toilets) {
+            LatLng position = toilet.getCoordinates().toLatLng();
+            mMap.addMarker(new MarkerOptions().position(position).title(toilet.getDescription()));
+        }
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
 
-        // Add a marker in Warsaw and move the camera
-        Coordinates coordinates = dbUserAdapter.getCoordinates(1);
-        LatLng sydney = coordinates.toLatLng();
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Warsaw"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+    private void getAllDataFromDatabase() {
+        getAllUsers();
+        getAllToilets();
     }
 
     private void getAllUsers() {
         users = new ArrayList<User>();
-        userCursor = getAllUsersFromDatabase();
-        updateUserList();
+        long id = 1;
+        User user = null;
+        do {
+            user = dbAdapter.getUser(id);
+            if(user != null)
+                users.add(user);
+            id++;
+        } while(user != null);
     }
 
-    private Cursor getAllUsersFromDatabase() {
-        userCursor = dbUserAdapter.getAllUsers();
-        if(userCursor != null) {
-            startManagingCursor(userCursor);
-            userCursor.moveToFirst();
-        }
-        return userCursor;
-    }
-
-    void updateUserList() {
-        if(userCursor != null && userCursor.moveToFirst()) {
-            do {
-                long id = userCursor.getLong(dbUserAdapter.ID_COLUMN);
-                String nickname = userCursor.getString(dbUserAdapter.NICKNAME_COLUMN);
-                String phoneInfo = userCursor.getString(dbUserAdapter.PHONEINFO_COLUMN);
-                users.add(new User(id, nickname, phoneInfo));
-            } while(userCursor.moveToNext());
-        }
+    private void getAllToilets() {
+        toilets = new ArrayList<Toilet>();
+        long id = 1;
+        Toilet toilet = null;
+        do {
+            toilet = dbAdapter.getToilet(id);
+            if(toilet != null)
+                toilets.add(toilet);
+            id++;
+        } while(toilet != null);
     }
 
     @Override
     protected void onDestroy() {
-        if(dbUserAdapter != null)
-            dbUserAdapter.close();
+        if(dbAdapter != null)
+            dbAdapter.close();
         super.onDestroy();
     }
 }

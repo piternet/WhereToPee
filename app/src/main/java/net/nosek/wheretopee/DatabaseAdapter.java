@@ -13,7 +13,7 @@ public class DatabaseAdapter {
     private static final String DEBUG_TAG = "SQL Lite debug";
 
     /* Common constants */
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 5;
     private static final String DB_NAME = "WhereToPeeDatabase";
     private static final String DB_USER_TABLE = "User";
     private static final String DB_COORDINATES_TABLE = "Coordinates";
@@ -165,6 +165,13 @@ public class DatabaseAdapter {
         dbHelper.close();
     }
 
+    public boolean isEmpty() { // checks only TOILET table
+        Cursor cursor = db.rawQuery("SELECT * FROM " + DB_TOILET_TABLE, null);
+        if (cursor.moveToFirst())
+            return false;
+        return true;
+    }
+
     /* SAVING & READING TO / FROM DATABASE */
     public long insertUser(String nickname, String phoneInfo) {
         ContentValues contentValues = new ContentValues();
@@ -186,7 +193,7 @@ public class DatabaseAdapter {
 
     public User getUser(long id) {
         String[] columns = {KEY_ID, KEY_NICKNAME, KEY_PHONEINFO};
-        String where = KEY_ID + "" + id;
+        String where = KEY_ID + "=" + id;
         Cursor cursor = db.query(DB_USER_TABLE, columns, where, null, null, null, null);
         User user = null; // to return
         if(cursor != null && cursor.moveToFirst()) {
