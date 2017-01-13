@@ -18,8 +18,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private DatabaseAdapter dbUserAdapter;
+
     private Cursor userCursor;
     private ArrayList<User> users;
+
+    private ArrayList<Toilet> toilets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dbUserAdapter.insertUser("admin", "Android 3.1");
         dbUserAdapter.insertUser("piternet", "Android 4.1");
         dbUserAdapter.insertUser("anonim", "iOS xd");
+        dbUserAdapter.insertCoordinates(12, 21);
         getAllUsers();
         String msg = users.toString();
         Log.d("USER TAG", msg);
@@ -49,8 +53,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Warsaw and move the camera
-        LatLng sydney = new LatLng(52, 21);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        Coordinates coordinates = dbUserAdapter.getCoordinates(1);
+        LatLng sydney = coordinates.toLatLng();
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Warsaw"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
