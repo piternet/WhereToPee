@@ -13,7 +13,7 @@ public class DatabaseAdapter {
     private static final String DEBUG_TAG = "SQL Lite debug";
 
     /* Common constants */
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 7;
     private static final String DB_NAME = "WhereToPeeDatabase";
     private static final String DB_USER_TABLE = "User";
     private static final String DB_COORDINATES_TABLE = "Coordinates";

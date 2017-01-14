@@ -1,14 +1,19 @@
 package net.nosek.wheretopee;
 
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.location.LocationManager;
+import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -17,12 +22,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, com.google.android.gms.location.LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
+    private FusedLocationProviderApi fusedLocationProviderApi;
+    private LocationRequest locationRequest;
     private DatabaseAdapter dbAdapter;
+    private boolean firstLocation = false;
+    private LatLng mLocation;
 
-    private Cursor userCursor;
     private ArrayList<User> users;
     private ArrayList<Toilet> toilets;
 
@@ -40,52 +49,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        try {
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(myIntent);
-                overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
-            }
-            else {
-                mapFragment.getMapAsync(this);
-                overridePendingTransition(R.anim.push_up_out, R.anim.push_up_in);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        dbAdapter = new DatabaseAdapter(getApplicationContext());
-        dbAdapter.open();
-        if(dbAdapter.isEmpty())
-            insertData();
-        getAllDataFromDatabase();
-        String msg = users.toString() + "\n" + toilets.toString();
-        Log.d("USER TAG", msg);
+        if(!firstLocation)
+            Toast.makeText(getApplicationContext(), "Waiting to determine your location..." , Toast.LENGTH_LONG).show();
+        loadDatabase();
+        getLocation();
     }
 
-    /**
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+    private void getLocation(){
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(500);
+        locationRequest.setFastestInterval(500);
+        fusedLocationProviderApi = LocationServices.FusedLocationApi;
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+
+    @Override
+    public void onConnected(Bundle arg0) {
+        try {
+            fusedLocationProviderApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+        } catch(SecurityException e) {
+
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if(!firstLocation) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+            mLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            firstLocation = true;
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLocation, 15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLocation, 15));
         for(Toilet toilet : toilets) {
             LatLng position = toilet.getCoordinates().toLatLng();
             mMap.addMarker(new MarkerOptions().position(position).title(toilet.getDescription()));
         }
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-
-    private void getAllDataFromDatabase() {
+    private void loadDatabase() {
+        dbAdapter = new DatabaseAdapter(getApplicationContext());
+        dbAdapter.open();
+        if(dbAdapter.isEmpty())
+            insertData();
         getAllUsers();
         getAllToilets();
+        String msg = users.toString() + "\n" + toilets.toString();
+        Log.d("USER TAG", msg);
     }
 
     private void getAllUsers() {
@@ -111,6 +135,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             id++;
         } while(toilet != null);
     }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    public void onConnectionSuspended(int i) {}
+    public void onConnectionFailed(ConnectionResult c) {}
 
     @Override
     protected void onDestroy() {
