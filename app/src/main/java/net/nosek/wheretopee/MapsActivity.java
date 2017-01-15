@@ -22,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -51,7 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getLocation();
     }
 
-    private void getLocation(){
+    private void getLocation() {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(500);
@@ -90,6 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLocation, 15));
+        mMap.addMarker(new MarkerOptions().position(mLocation).title("My location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
         for(Toilet toilet : toilets) {
             LatLng position = toilet.getCoordinates().toLatLng();
             mMap.addMarker(new MarkerOptions().position(position).title(toilet.getDescription()).snippet(toilet.toString()));
@@ -106,7 +108,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Context mContext = getApplicationContext();
                 LinearLayout info = new LinearLayout(mContext);
                 info.setOrientation(LinearLayout.VERTICAL);
-                info.setWeightSum(0.7f);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 0.7f);
+                info.setLayoutParams(params);
 
                 TextView title = new TextView(mContext);
                 title.setTextColor(Color.BLACK);
