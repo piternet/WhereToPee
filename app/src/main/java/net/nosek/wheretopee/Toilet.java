@@ -93,15 +93,12 @@ public class Toilet {
 
     @Override
     public String toString() {
-        return "Toilet{" +
-                "id=" + id +
-                "coordinates=" + coordinates +
-                ", userWhoAdded=" + userWhoAdded +
-                ", description='" + description + '\'' +
-                ", isFree=" + isFree +
-                ", hasChangingTable=" + hasChangingTable +
-                ", disabledAccesible=" + disabledAccesible +
-                ", acceptedByAdmin=" + acceptedByAdmin +
-                '}';
+
+        String isFreeString = isFree ? "bezpłatna" : "płatna";
+        String hasChangingTableString = hasChangingTable ? "posiada przewijak" : "nie posiada przewijaka";
+        String disabledAccesibleString = disabledAccesible ? "jest przystosowana" : "nie jest przystosowana";
+
+        return "Toaleta ta jest " + isFreeString + ", " + hasChangingTableString + " dla niemowląt, " + disabledAccesibleString +
+                " do potrzeb osób niepełnosprawnych." + "\n" + "Została dodana przez użytkownika " + userWhoAdded.getNickname() + ".";
     }
 }

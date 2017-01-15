@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">WhereToPee</string>
     <string name="title_activity_maps">Map</string>
+    <string name="determine_location">Waiting to determine your location...</string>
 </resources>

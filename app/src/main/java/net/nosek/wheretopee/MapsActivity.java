@@ -1,11 +1,16 @@
 package net.nosek.wheretopee;
 
-import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -35,22 +41,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<User> users;
     private ArrayList<Toilet> toilets;
 
-    private void insertData() {
-        dbAdapter.insertUser("admin", "Android 3.1");
-        dbAdapter.insertUser("piternet", "Android 4.1");
-        dbAdapter.insertUser("anonim", "iOS xd");
-        dbAdapter.insertCoordinates(52.211997, 20.982090);
-        dbAdapter.insertCoordinates(52.188821, 21.002455);
-        dbAdapter.insertToilet(dbAdapter.getCoordinates(1), dbAdapter.getUser(1), "MIMowa toaletka", false, false, false, true);
-        dbAdapter.insertToilet(dbAdapter.getCoordinates(2), dbAdapter.getUser(3), "Druga toaletka", false, true, true, true);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         if(!firstLocation)
-            Toast.makeText(getApplicationContext(), "Waiting to determine your location..." , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.determine_location, Toast.LENGTH_LONG).show();
         loadDatabase();
         getLocation();
     }
@@ -93,19 +89,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLocation, 15));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLocation, 15));
         for(Toilet toilet : toilets) {
             LatLng position = toilet.getCoordinates().toLatLng();
-            mMap.addMarker(new MarkerOptions().position(position).title(toilet.getDescription()));
+            mMap.addMarker(new MarkerOptions().position(position).title(toilet.getDescription()).snippet(toilet.toString()));
         }
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                Context mContext = getApplicationContext();
+                LinearLayout info = new LinearLayout(mContext);
+                info.setOrientation(LinearLayout.VERTICAL);
+                info.setWeightSum(0.7f);
+
+                TextView title = new TextView(mContext);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(mContext);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
     }
 
     private void loadDatabase() {
         dbAdapter = new DatabaseAdapter(getApplicationContext());
         dbAdapter.open();
         if(dbAdapter.isEmpty())
-            insertData();
+            dbAdapter.insertData();
         getAllUsers();
         getAllToilets();
         String msg = users.toString() + "\n" + toilets.toString();

@@ -13,7 +13,7 @@ public class DatabaseAdapter {
     private static final String DEBUG_TAG = "SQL Lite debug";
 
     /* Common constants */
-    private static final int DB_VERSION = 7;
+    private static final int DB_VERSION = 8;
     private static final String DB_NAME = "WhereToPeeDatabase";
     private static final String DB_USER_TABLE = "User";
     private static final String DB_COORDINATES_TABLE = "Coordinates";
@@ -277,5 +277,10 @@ public class DatabaseAdapter {
             toilet = new Toilet(id, coordinates, user, description, isFree, hasChangingTable, disabledAccesible, acceptedByAdmin);
         }
         return toilet;
+    }
+
+    public void insertData() {
+        DatabaseCreator creator = new DatabaseCreator(this);
+        creator.create();
     }
 }
